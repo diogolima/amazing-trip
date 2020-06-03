@@ -12,7 +12,7 @@ import Header from "./components/Header.vue";
 export default {
 	components: {
 		'app-header': Header,
-		'app-flight-list': FlightList,
+		'app-flight-list': FlightList
 	}
 };
 </script>
@@ -25,5 +25,8 @@ export default {
 	text-align: center;
 	color: #2c3e50;
 	margin-top: 60px;
+	width: 800px;
+	height: 700px;
+	padding: 0 20% 0 20%;
 }
 </style>

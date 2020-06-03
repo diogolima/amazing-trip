@@ -1,39 +1,95 @@
 <template>
-	<div id="flight">
-		<table>
-			<thead>
-				<th>City from</th>
-				<th>City to</th>
-				<th>Price</th>
-				<th>Days on destination</th>
-				<th>Date From</th>
-				<th>Date to</th>
-				<th>Link</th>
-			</thead>
-			<tbody>
-				<app-flight-info v-for="info in infoFlights" :key="info.id" :infoFlight="info"></app-flight-info>
-			</tbody>
-		</table>
-		<ul></ul>
+	<div>
+		<div id="flight-search">
+			<app-travel-search :infoSearch="infoSearch" @updateSearch="infoSearch = $event"></app-travel-search>
+		</div>
+		<b-table :data="data">
+			<template slot-scope="props">
+				<b-table-column field="cityFrom" label="City From">
+					{{ props.row.cityFrom }}
+				</b-table-column>
+				<b-table-column field="cityTo" label="City To">
+					{{ props.row.cityTo }}
+				</b-table-column>
+				<b-table-column field="price" label="Price">
+					{{ props.row.price }}
+				</b-table-column>
+				<b-table-column field="dateFrom" label="Date From">
+					{{ findDate(props.row.cityCodeFrom, "From", props.row.route) }}
+				</b-table-column>
+				<b-table-column field="dateTo" label="Date to">
+					{{findDate(props.row.cityCodeTo, "To", props.row.route) }}
+				</b-table-column>
+				<b-table-column field="priceLink" label="Link">
+					<a v-bind:href="props.row.deep_link" target="_blank">Price</a>
+				</b-table-column>
+			</template>
+		</b-table>	
 	</div>
 </template>
 
 <script>
 import axios from "axios";
-import FlightInfo from './FlightInfo.vue';
+import TravelSearch from "./TravelSearch.vue";
+import { eventBus } from "../main.js";
+
+const prefixUrlPath = "https://api.skypicker.com/flights?flyFrom=";
+// const stayInDestinationUrlHelper = "daysInDestinationFrom=2&daysInDestinationTo=3";
+const flyOnWeekend = "flyDays=5&flyDaysType=departure&returnFlyDays=0&returnFlyDaysType=arrival";
+const dateFromPathHelper = "&dateFrom=";
+const dateToPathHelper = "&dateTo=";
 
 export default {
 	components: {
-		'app-flight-info': FlightInfo,
+		'app-travel-search': TravelSearch
 	},
 	
 	data: () => {
 		return {
-			infoFlights: []
+			data: [],
+			isHoverable: true,
+			isLoading: false,
+			isPaginated: true,
+			infoSearch: {
+				flyFrom: "BER",
+				flyTo: "",
+				daysDestinationFrom: 2,
+				daysDestinationTo: 3,
+				dateFrom: "",
+				dateTo: "",
+				budget: 100
+			},
+			apiUrl: ""
 		}
 	},
 
 	methods: {
+		buildRequestUrl(infoSearch){
+			const dateFromString = this.dateToString(infoSearch.dateFrom);
+			const dateToString = this.dateToString(infoSearch.dateTo);
+			const dateFromPath = this.buildDatePath(dateFromString, dateFromPathHelper)
+			const dateToPath = this.buildDatePath(dateToString, dateToPathHelper)
+
+			const destinationDays = `daysInDestinationFrom=${infoSearch.daysDestinationFrom}&daysInDestinationTo=${infoSearch.daysDestinationTo}`;
+			return `${prefixUrlPath}${infoSearch.flyFrom}${dateFromPath}${dateToPath}&partner=picky&v=3&${destinationDays}&${flyOnWeekend}&price_to=${infoSearch.budget}`;
+		},
+		dateToString(date){
+			if (date === "") return ""
+
+			const day = date.getDate();
+			const month = date.getMonth() + 1;
+			const year = date.getFullYear();
+			return (day + '/' + month + '/' + year)		
+		},
+		buildDatePath(date, pathHelper){
+			if (date === "") return ""
+
+			return pathHelper + date
+		},
+		findDate(cityCode, destination, route) {
+			const legFlight = route.filter(function(route)	{ return route[`cityCode${destination}`] === cityCode } )[0];
+			return (legFlight !== undefined) ? this.secToDate(legFlight.dTime) : "";
+		},
 		secToDate(second) {
 			var t = new Date(1970, 0, 1); // Epoch
 			t.setSeconds(second);
@@ -41,22 +97,24 @@ export default {
 		}
 	},
 
-	mounted() {
-		axios
-			.get(
-				// "https://api.skypicker.com/flights?flyFrom=TXL&to=AMS&dateFrom=18/03/2020&dateTo=12/12/2020&partner=picky&v=3&onlyWeekends=1"
-				// "https://api.skypicker.com/flights?flyFrom=TXL&to=AMS&dateFrom=18/03/2020&dateTo=12/12/2020&partner=picky&v=3&daysInDestinationFrom=2&daysInDestinationTo=3&flyDays=4,5&flyDaysType=departure&returnFlyDays=0,1&returnFlyDaysType=arrival"
-				"https://api.skypicker.com/flights?flyFrom=TXL&dateFrom=18/04/2020&dateTo=18/06/2020&partner=picky&v=3&daysInDestinationFrom=2&daysInDestinationTo=3&flyDays=5&flyDaysType=departure&returnFlyDays=0&returnFlyDaysType=arrival&price_to=100"
-			)
-			.then(response => {
-				this.infoFlights = response.data.data
-			});
+	created() {
+		eventBus.$on('updateSearch', infoSearch => {
+			this.apiUrl = this.buildRequestUrl(infoSearch);
+			
+			axios.get(this.apiUrl)
+				.then(response => {
+					this.data = response.data.data
+				});
+		})
 	}
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+#flight-lists{
+	padding-top: 15px;
+}s
 h3 {
 	margin: 40px 0 0;
 }
@@ -70,5 +128,11 @@ li {
 }
 a {
 	color: #42b983;
+}
+th {
+	width: 15%;
+}
+thead {
+	width: 100%;
 }
 </style>
