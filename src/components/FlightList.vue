@@ -71,7 +71,9 @@ export default {
 			const dateToPath = this.buildDatePath(dateToString, dateToPathHelper)
 
 			const destinationDays = `daysInDestinationFrom=${infoSearch.daysDestinationFrom}&daysInDestinationTo=${infoSearch.daysDestinationTo}`;
-			return `${prefixUrlPath}${infoSearch.flyFrom}${dateFromPath}${dateToPath}&partner=picky&v=3&${destinationDays}&${flyOnWeekend}&price_to=${infoSearch.budget}`;
+			const flyTo = infoSearch.flyTo === "" ? "" : `&to=${infoSearch.flyTo}`;
+
+			return `${prefixUrlPath}${infoSearch.flyFrom}${flyTo}${dateFromPath}${dateToPath}&partner=picky&v=3&${destinationDays}&${flyOnWeekend}&price_to=${infoSearch.budget}`;
 		},
 		dateToString(date){
 			if (date === "") return ""
@@ -87,7 +89,7 @@ export default {
 			return pathHelper + date
 		},
 		findDate(cityCode, destination, route) {
-			const legFlight = route.filter(function(route)	{ return route[`cityCode${destination}`] === cityCode } )[0];
+			const legFlight = route.filter(function(route)	{ return route[`cityCodeFrom`] === cityCode } )[0];
 			return (legFlight !== undefined) ? this.secToDate(legFlight.dTime) : "";
 		},
 		secToDate(second) {
@@ -99,12 +101,19 @@ export default {
 
 	created() {
 		eventBus.$on('updateSearch', infoSearch => {
+			this.isLoading = true
+			try {
 			this.apiUrl = this.buildRequestUrl(infoSearch);
-			
 			axios.get(this.apiUrl)
 				.then(response => {
 					this.data = response.data.data
 				});
+			} catch (error) {
+        this.data = []
+        this.handleError(error)
+      } finally {
+        this.isLoading = false
+      }
 		})
 	}
 }
