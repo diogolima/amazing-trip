@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div id="flight-search">
-			<app-travel-search :infoSearch="infoSearch" @updateSearch="infoSearch = $event"></app-travel-search>
+			<app-flight-search :infoSearch="infoSearch" @updateSearch="infoSearch = $event"></app-flight-search>
 		</div>
 		<b-table :data="data">
 			<template slot-scope="props">
@@ -30,7 +30,8 @@
 
 <script>
 import axios from "axios";
-import TravelSearch from "./TravelSearch.vue";
+import FlightSearch from "./FlightSearch.vue";
+import errorHandler from '../mixins/errorHandler'
 import { eventBus } from "../main.js";
 
 const prefixUrlPath = "https://api.skypicker.com/flights?flyFrom=";
@@ -40,8 +41,9 @@ const dateFromPathHelper = "&dateFrom=";
 const dateToPathHelper = "&dateTo=";
 
 export default {
+	mixins: [errorHandler],
 	components: {
-		'app-travel-search': TravelSearch
+		'app-flight-search': FlightSearch
 	},
 	
 	data: () => {
@@ -55,8 +57,9 @@ export default {
 				flyTo: "",
 				daysDestinationFrom: 2,
 				daysDestinationTo: 3,
-				dateFrom: "",
-				dateTo: "",
+				dateFrom: new Date(),
+				dateTo: new Date(),
+				rangeDates: [new Date(), new Date()],
 				budget: 100
 			},
 			apiUrl: ""
@@ -103,6 +106,8 @@ export default {
 		eventBus.$on('updateSearch', infoSearch => {
 			this.isLoading = true
 			try {
+				console.log('here')
+				console.log(infoSearch)
 			this.apiUrl = this.buildRequestUrl(infoSearch);
 			axios.get(this.apiUrl)
 				.then(response => {
