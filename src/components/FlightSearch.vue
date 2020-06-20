@@ -2,12 +2,9 @@
 <div>
   <section>
     <div class="searchInfo"> 
-      <!-- <b-field class="info-space main-info-space" label="City From">
-        <b-input size="is-small" v-model="infoSearch.flyFrom" type="text"></b-input>
-      </b-field> -->
       <b-field class="info-space main-info-space" label="City From">
             <b-autocomplete
-                v-model="infoSearch.flyFrom"
+                v-model="flyFrom"
                 size="is-small"
                 :data="filteredDataFromCity"
                 placeholder="e.g. Berlin"
@@ -19,7 +16,7 @@
         </b-field>
         <b-field class="info-space main-info-space" label="City To">
             <b-autocomplete
-                v-model="infoSearch.flyTo"
+                v-model="flyTo"
                 size="is-small"
                 :data="filteredDataToCity"
                 placeholder="e.g. Berlin"
@@ -29,9 +26,6 @@
                 <template slot="empty">No results found</template>
             </b-autocomplete>
         </b-field>
-      <!-- <b-field class="info-space main-info-space" label="City To">
-        <b-input size="is-small" v-model="infoSearch.flyTo" type="text" placeholder="Optional"></b-input>
-      </b-field> -->
       <b-field class="info-space main-info-space" label="Range of dates">
         <b-datepicker 
           v-model="infoSearch.rangeDates"
@@ -54,6 +48,20 @@
       <b-field class="info-space side-info-space" label="Budget">
         <b-numberinput step="50" type="is-dark" controls-position="compact" size="is-small" v-model="infoSearch.budget"></b-numberinput>
       </b-field>
+      <b-field id="weekend" class="info-space side-info-space">
+        <b-radio-button v-model="infoSearch.flyOn"
+            native-value="Weekend"
+            type="is-dark"
+            size="is-small">
+            Weekend
+        </b-radio-button>
+        <b-radio-button v-model="infoSearch.flyOn"
+              native-value="AllDays"
+              type="is-dark"
+              size="is-small">
+              All days
+        </b-radio-button>
+      </b-field>
       <b-field class="btn-position info-space">
         <b-button @click="searchFlights">Search</b-button>
       </b-field>
@@ -65,7 +73,6 @@
 
 <script>
 import { eventBus } from '../main.js';
-// import axios from "axios";
 
 export default {
   props: {
@@ -77,28 +84,29 @@ export default {
   data: () => {
     const today = new Date()
     return {
-      dataTo: [],
-      dataFrom: [],
-      airportData: [],
+      flyTo: "",
+      flyFrom: "",
+      dataToList: [],
+      dataFromList: [],
       minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
     }
   },
   
   computed: {
     filteredDataToCity() {
-      return this.dataTo.filter((option) => {
+      return this.dataToList.filter((option) => {
         return option
           .toString()
           .toLowerCase()
-          .indexOf(this.infoSearch.flyTo.toLowerCase()) >= 0
+          .indexOf(this.flyTo.toLowerCase()) >= 0
       })
     },
     filteredDataFromCity() {
-      return this.dataFrom.filter((option) => {
+      return this.dataFromList.filter((option) => {
         return option
           .toString()
           .toLowerCase()
-          .indexOf(this.infoSearch.flyFrom.toLowerCase()) >= 0
+          .indexOf(this.flyFrom.toLowerCase()) >= 0
       })
     }
   },
@@ -110,34 +118,27 @@ export default {
     },
 
     updateDataSearch() {
-      this.infoSearch.flyFrom = this.infoSearch.flyFrom.split("(").pop().split(")")[0];
-      this.infoSearch.flyTo = this.infoSearch.flyTo.split("(").pop().split(")")[0];
+      this.infoSearch.flyFrom  = this.flyFrom.split("(").pop().split(")")[0];
+      this.infoSearch.flyTo    = this.flyTo.split("(").pop().split(")")[0];
       this.infoSearch.dateFrom = this.infoSearch.rangeDates[0];
-      this.infoSearch.dateTo = this.infoSearch.rangeDates[1];
+      this.infoSearch.dateTo   = this.infoSearch.rangeDates[1];
     }
   },
 
   mounted() {
     const iataDataComplete = require("../assets/iata.json");
 
-    let airportData = iataDataComplete
-      .filter((el) => el.IATA !== "\\N" || el.City !== "")
-      .map(iata => {
-         return {
-            city: iata.City,
-            iata: iata.IATA
-          }
-      })
+    let airportsData = iataDataComplete
+      .filter((airport) => airport.IATA !== "\\N" && airport.City !== "")
+      .map(airport => {
+        return `${airport.City} (${airport.IATA})`
+      });
+      
 
-    const iataData = airportData
-      .map(iata => {
-        const iataCode = iata.iata !== "\\N" ? `(${iata.iata})` : "" 
-        return `${iata.city} ${iataCode}`
-      })
-
-    // this.airportData = airportData;
-    this.dataFrom = iataData;
-    this.dataTo = iataData;
+    this.dataToList = airportsData;
+    this.dataFromList = airportsData;
+    this.flyTo = this.infoSearch.flyTo
+    this.flyFrom = this.infoSearch.flyFrom
   }
 }
 </script>
@@ -156,6 +157,9 @@ export default {
 .side-info-space {
   margin-left: 15px;
   width: 15%; 
+}
+#weekend {
+  align-self: flex-end;
 }
 .btn-position {
   margin-inline-start: auto;

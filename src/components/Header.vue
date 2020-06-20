@@ -14,7 +14,6 @@
 }
 img{
   margin-top: -35px;
-  /* width: 420px;   */
   align-content: center;
   align-items: center;
 }
