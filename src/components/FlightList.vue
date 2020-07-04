@@ -3,17 +3,12 @@
 		<div id="flight-search">
 			<app-flight-search :infoSearch="infoSearch" @updateSearch="infoSearch = $event"></app-flight-search>
 		</div>
-		<b-select v-model="perPage" :disabled="!isPaginated">
-			<option value="5">5 per page</option>
-			<option value="10">10 per page</option>
-			<option value="20">20 per page</option>
-			<option value="50">50 per page</option>
-		</b-select>
+		
 		<b-table :data="data"
 		:loading="isLoading"
 		:hoverable="isHoverable"
-		:paginated="isPaginated"
-		:per-page="perPage"
+		:paginated="infoSearch.isPaginated"
+		:per-page="infoSearch.perPage"
 		:pagination-simple="isPaginationSimple"
 		:sort-icon="sortIcon"
 		@sort="onSort"
@@ -64,14 +59,14 @@ export default {
 			data: [],
 			isHoverable: true,
 			isLoading: false,
-			isPaginated: true,
 			isPaginationSimple: false,
 			total: 0,
       currentPage: 1,
-			perPage: 10,
 			sortOrder: 'desc',
 			sortIcon: 'chevron-up',	
 			infoSearch: {
+				isPaginated: true,
+				perPage: 10,
 				flyFrom: "BER",
 				flyTo: "",
 				flyOn: "Weekend",

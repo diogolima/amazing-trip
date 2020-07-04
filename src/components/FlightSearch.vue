@@ -7,7 +7,7 @@
                 v-model="flyFrom"
                 size="is-small"
                 :data="filteredDataFromCity"
-                placeholder="e.g. Berlin"
+                placeholder="e.g. Berlin (TXL)"
                 icon="magnify"
                 clearable
                 @select="option => selected = option">
@@ -19,14 +19,14 @@
                 v-model="flyTo"
                 size="is-small"
                 :data="filteredDataToCity"
-                placeholder="e.g. Berlin"
+                placeholder="e.g. Berlin (TXL)"
                 icon="magnify"
                 clearable
                 @select="option => selected = option">
                 <template slot="empty">No results found</template>
             </b-autocomplete>
         </b-field>
-      <b-field class="info-space main-info-space" label="Range of dates">
+      <b-field class="info-space main-info-space" label="Range of dates" type="is-dark">
         <b-datepicker 
           v-model="infoSearch.rangeDates"
           placeholder="Click to select..."
@@ -34,6 +34,7 @@
           trap-focus
           size="is-small"
           :min-date="minDate"
+          :mobile-native=false
           range>
         </b-datepicker>
       </b-field>
@@ -46,7 +47,7 @@
         <b-numberinput min="1" type="is-dark" controls-position="compact" size="is-small" v-model="infoSearch.daysDestinationTo"></b-numberinput >
       </b-field>
       <b-field class="info-space side-info-space" label="Budget">
-        <b-numberinput step="50" type="is-dark" controls-position="compact" size="is-small" v-model="infoSearch.budget"></b-numberinput>
+        <b-numberinput min="1" type="is-dark" controls-position="compact" size="is-small" v-model="infoSearch.budget"></b-numberinput>
       </b-field>
       <b-field id="weekend" class="info-space side-info-space">
         <b-radio-button v-model="infoSearch.flyOn"
@@ -62,6 +63,15 @@
               All days
         </b-radio-button>
       </b-field>
+      <b-field class="btn-position info-space"
+      type="is-dark">
+        <b-select v-model="infoSearch.perPage" :disabled="!infoSearch.isPaginated">
+          <option value="5">5 per page</option>
+          <option value="10">10 per page</option>
+          <option value="20">20 per page</option>
+          <option value="50">50 per page</option>
+        </b-select>
+		</b-field>
       <b-field class="btn-position info-space">
         <b-button @click="searchFlights">Search</b-button>
       </b-field>
@@ -169,6 +179,9 @@ export default {
 .btn-position button{
   background-color: #397c4f;
   color: white;
+}
+.select:not(.is-multiple):not(.is-loading)::after{
+  background-color: red !important;
 }
 
 </style>
