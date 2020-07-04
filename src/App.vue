@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<app-header></app-header>
+		<div id="header"><app-header></app-header></div>
 		<app-flight-list></app-flight-list>
 	</div>
 </template>
@@ -12,7 +12,7 @@ import Header from "./components/Header.vue";
 export default {
 	components: {
 		'app-header': Header,
-		'app-flight-list': FlightList,
+		'app-flight-list': FlightList
 	}
 };
 </script>
@@ -25,5 +25,12 @@ export default {
 	text-align: center;
 	color: #2c3e50;
 	margin-top: 60px;
+	width: 100%;
+	height: 700px;
+	padding: 0 20% 0 20%;
+}
+
+#header {
+	width:	100%
 }
 </style>
