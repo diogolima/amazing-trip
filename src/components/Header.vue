@@ -1,5 +1,5 @@
 <template>
-    <img alt="amazing logo" src="../assets/logo_crop.png" /> 
+  <img alt="amazing logo" src="../assets/logo_crop.png" /> 
 </template>
 
 <script>
