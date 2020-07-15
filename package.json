@@ -18,7 +18,7 @@
     "vuejs-datepicker": "^1.6.2",
     "@vue/cli-plugin-babel": "~4.2.0",
     "@vue/cli-plugin-eslint": "~4.2.0",
-    "@vue/cli-service": "~4.2.0",
+    "@vue/cli-service": "~4.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
