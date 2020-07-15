@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<div id="header"><app-header></app-header></div>
+		<div id="head-container"><app-header></app-header></div>
 		<app-flight-list></app-flight-list>
 	</div>
 </template>
@@ -30,7 +30,7 @@ export default {
 	padding: 0 20% 0 20%;
 }
 
-#header {
+#head-container {
 	width:	100%
 }
 </style>
